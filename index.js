@@ -2,33 +2,48 @@ const express=require("express");
 const body_parser=require("body-parser");
 const axios=require("axios");
 require('dotenv').config();
+const Pusher = require("pusher");
 
 const app=express().use(body_parser.json());
 
 const token=process.env.TOKEN;
 const mytoken=process.env.MYTOKEN;//prasath_token
 
-app.listen(process.env.PORT,()=>{
+app.listen(8000,()=>{
     console.log("webhook is listening");
 });
 
+
+
+const pusher = new Pusher({
+  appId: "2027655",
+  key: "064368eff0bef3b6a176",
+  secret: "94d63603a27c5671213f",
+  cluster: "ap2",
+  useTLS: true
+});
+
+pusher.trigger("my-channel", "my-event", {
+  message: "hello world"
+});
+
 //to verify the callback url from dashboard side - cloud api side
-app.get("/webhook",(req,res)=>{
-   let mode=req.query["hub.mode"];
-   let challange=req.query["hub.challenge"];
-   let token=req.query["hub.verify_token"];
+app.get("/webhook", (req, res) => {
+    const mode = req.query["hub.mode"];
+    const token = req.query["hub.verify_token"];
+    const challenge = req.query["hub.challenge"];
 
-
-    if(mode && token){
-
-        if(mode==="subscribe" && token===mytoken){
-            res.status(200).send(challange);
-        }else{
-            res.status(403);
+    if (mode && token) {
+        if (mode === "subscribe" && token === mytoken) {
+            console.log("WEBHOOK VERIFIED ✅");
+            res.status(200).send(challenge);
+        } else {
+            console.log("WEBHOOK VERIFICATION FAILED ❌");
+            res.sendStatus(403); // This line was missing in your code
         }
-
+    } else {
+        res.sendStatus(400); // optional: bad request if something's missing
     }
-
 });
 
 app.post("/webhook",(req,res)=>{ //i want some 
