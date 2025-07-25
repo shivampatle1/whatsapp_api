@@ -4,10 +4,14 @@ const axios=require("axios");
 require('dotenv').config();
 const Pusher = require("pusher");
 
+const path = require("path");
+app.use(express.static(path.join(__dirname, index.html)));
+
+
 const app=express().use(body_parser.json());
 
 const token=process.env.TOKEN;
-const mytoken=process.env.MYTOKEN;//prasath_token
+const mytoken=process.env.MYTOKEN;
 
 app.listen(8000,()=>{
     console.log("webhook is listening");
